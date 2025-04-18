@@ -1,55 +1,113 @@
-# `@napi-rs/package-template`
+# `node-ark-vrf`
 
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
+![https://github.com/sentientforest/node-ark-vrf/actions](https://github.com/sentientforest/node-ark-vrf/workflows/CI/badge.svg)
 
-> Template project for writing node packages with napi-rs.
+> Elliptic Curve VRF. Node.js bindings for the ark-vrf Rust crate available on crates.io.
 
-# Usage
+- Generate VRF keypairs from seeds
+- Generate VRF proofs with optional auxiliary data
+- Verify VRF proofs
+- Convert VRF proofs to hash outputs
+- Built on the robust ark-vrf Rust crate
+- Uses the Bandersnatch curve for optimal performance and security
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `yarn install` to install dependencies.
-4. Run `npx napi rename -n [name]` command under the project folder to rename your package.
+## Installation
 
-## Install this test package
-
+```sh
+npm install node-ark-vrf
+# or
+yarn add node-ark-vrf
+# or
+pnpm add node-ark-vrf
 ```
-yarn add @napi-rs/package-template
+
+## Usage
+
+```typescript
+import { generateKeypairFromSeed, vrfProve, vrfVerify, vrfProofToHash } from 'node-ark-vrf'
+
+// Generate a keypair from a seed
+const keypair = generateKeypairFromSeed('my seed')
+
+// Generate a VRF proof
+const message = 'message to prove'
+const auxData = 'optional auxiliary data'
+const proof = vrfProve(keypair.secretKey, message, auxData)
+
+// Verify the proof
+const isValid = vrfVerify(keypair.publicKey, message, proof, auxData)
+console.log('Proof is valid:', isValid)
+
+// Get the hash output from the proof
+const hash = vrfProofToHash(proof)
+console.log('VRF hash output:', hash)
 ```
 
-## Support matrix
+## API Reference
+
+### `generateKeypairFromSeed(seed: string): VrfKeyPair`
+
+Generates a VRF keypair from a seed string.
+
+- `seed`: A string used to deterministically generate the keypair
+- Returns: `VrfKeyPair` containing hex-encoded `publicKey` and `secretKey`
+
+### `vrfProve(secretKey: string, message: string, auxData?: string): string`
+
+Generates a VRF proof for a message using the secret key.
+
+- `secretKey`: Hex-encoded secret key from `VrfKeyPair`
+- `message`: Message to generate proof for
+- `auxData`: Optional auxiliary data to include in the proof
+- Returns: Hex-encoded VRF proof
+
+### `vrfVerify(publicKey: string, message: string, proof: string, auxData?: string): boolean`
+
+Verifies a VRF proof using the public key.
+
+- `publicKey`: Hex-encoded public key from `VrfKeyPair`
+- `message`: Original message
+- `proof`: Hex-encoded proof from `vrfProve`
+- `auxData`: Optional auxiliary data (must match what was used in `vrfProve`)
+- Returns: `true` if the proof is valid, `false` otherwise
+
+### `vrfProofToHash(proof: string): string`
+
+Converts a VRF proof to its hash output.
+
+- `proof`: Hex-encoded proof from `vrfProve`
+- Returns: Hex-encoded hash value
+
+## Support Matrix
 
 ### Operating Systems
 
-|                  | node14 | node16 | node18 |
-| ---------------- | ------ | ------ | ------ |
-| Windows x64      | ✓      | ✓      | ✓      |
-| Windows x32      | ✓      | ✓      | ✓      |
-| Windows arm64    | ✓      | ✓      | ✓      |
-| macOS x64        | ✓      | ✓      | ✓      |
-| macOS arm64      | ✓      | ✓      | ✓      |
-| Linux x64 gnu    | ✓      | ✓      | ✓      |
-| Linux x64 musl   | ✓      | ✓      | ✓      |
-| Linux arm gnu    | ✓      | ✓      | ✓      |
-| Linux arm64 gnu  | ✓      | ✓      | ✓      |
-| Linux arm64 musl | ✓      | ✓      | ✓      |
-| Android arm64    | ✓      | ✓      | ✓      |
-| Android armv7    | ✓      | ✓      | ✓      |
-| FreeBSD x64      | ✓      | ✓      | ✓      |
+|                  | node14 | node16 | node18 | node20 |
+| ---------------- | ------ | ------ | ------ | ------ |
+| Windows x64      | ✓      | ✓      | ✓      | ✓      |
+| Windows x32      | ✓      | ✓      | ✓      | ✓      |
+| Windows arm64    | ✓      | ✓      | ✓      | ✓      |
+| macOS x64       | ✓      | ✓      | ✓      | ✓      |
+| macOS arm64     | ✓      | ✓      | ✓      | ✓      |
+| Linux x64 gnu    | ✓      | ✓      | ✓      | ✓      |
+| Linux x64 musl   | ✓      | ✓      | ✓      | ✓      |
+| Linux arm gnu    | ✓      | ✓      | ✓      | ✓      |
+| Linux arm64 gnu  | ✓      | ✓      | ✓      | ✓      |
+| Linux arm64 musl | ✓      | ✓      | ✓      | ✓      |
+| Android arm64    | ✓      | ✓      | ✓      | ✓      |
+| Android armv7    | ✓      | ✓      | ✓      | ✓      |
+| FreeBSD x64      | ✓      | ✓      | ✓      | ✓      |
 
-## Ability
+## License
 
-### Build
-
-After `yarn build/npm run build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
-
+MIT
 ### Test
 
 With [ava](https://github.com/avajs/ava), run `yarn test/npm run test` to testing native addon. You can also switch to another testing framework if you want.
 
 ### CI
 
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@14`, `node@16`, `@node18`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
+With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@14`, `node@16`, `@node18`] x [`macOS`, `Linux`, `Windows`] matrix. 
 
 ### Release
 
