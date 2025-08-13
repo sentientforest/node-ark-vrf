@@ -1,20 +1,28 @@
 [package]
-authors = ["LongYinan <lynweklm@gmail.com>"]
-edition = "2021"
-name    = "napi-package-template"
+name = "node-ark-vrf"
 version = "0.1.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition = "2021"
+authors = ["Mike Graham <michael@forested.earth>"]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-napi        = "2"
+ark-vrf = { version = "0.1.0", features = ["bandersnatch", "std"] }
+napi = { version = "2", features = ["napi8"] }
 napi-derive = "2"
+ark-ff = { version = "0.5", default-features = false }
+ark-ec = { version = "0.5", default-features = false }
+ark-serialize = { version = "0.5", default-features = false }
+ark-std = { version = "0.5", default-features = false }
+hex = "0.4"
+sha2 = { version = "0.10", default-features = false }
 
 [build-dependencies]
 napi-build = "2"
 
 [profile.release]
 lto = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"

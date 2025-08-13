@@ -1,9 +1,9 @@
 {
-  "name": "@napi-rs/package-template",
+  "name": "node-ark-vrf",
   "version": "1.0.0",
-  "description": "Template project for writing node package with napi-rs",
+  "description": "Node.js bindings for the ark-vrf Rust crate, providing Verifiable Random Functions with Additional Data (VRF-AD) support",
   "main": "index.js",
-  "repository": "git@github.com:napi-rs/package-template.git",
+  "repository": "https://github.com/sentientforest/node-ark-vrf",
   "license": "MIT",
   "keywords": [
     "napi-rs",
@@ -18,7 +18,7 @@
     "index.js"
   ],
   "napi": {
-    "name": "package-template",
+    "name": "node-ark-vrf",
     "triples": {
       "defaults": true,
       "additional": [

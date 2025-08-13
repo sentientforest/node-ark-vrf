@@ -1,105 +1,259 @@
-# `@napi-rs/package-template`
+# node-ark-vrf
 
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
+![https://github.com/sentientforest/node-ark-vrf/actions](https://github.com/sentientforest/node-ark-vrf/workflows/CI/badge.svg)
 
-> Template project for writing node packages with napi-rs.
+**High-performance Node.js bindings for Elliptic Curve VRF (Verifiable Random Functions) with Additional Data support.**
 
-# Usage
+## Features
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `yarn install` to install dependencies.
-4. Run `npx napi rename -n [name]` command under the project folder to rename your package.
+- 🔐 **Cryptographically Secure**: Based on the robust [ark-vrf](https://github.com/davxy/ark-vrf) Rust implementation
+- ⚡ **High Performance**: Native Rust performance with Node.js convenience
+- 🛡️ **IETF Compliant**: Follows [RFC 9381](https://datatracker.ietf.org/doc/rfc9381/) specifications
+- 🔗 **Additional Data Binding**: Support for VRF-AD (auxiliary data)
+- 🎯 **Production Ready**: Comprehensive test coverage and examples
+- 🌐 **Cross-Platform**: Supports all major operating systems and architectures
 
-## Install this test package
+## Installation
 
+```sh
+npm install node-ark-vrf
+# or
+yarn add node-ark-vrf
+# or
+pnpm add node-ark-vrf
 ```
-yarn add @napi-rs/package-template
+
+## Quick Start
+
+```javascript
+const vrf = require('node-ark-vrf')
+
+// Generate a keypair
+const keypair = vrf.generateKeypairFromSeed('my-secret-seed')
+
+// Create a VRF proof
+const proof = vrf.vrfProve(keypair.secretKey, 'my-message')
+
+// Verify the proof
+const isValid = vrf.vrfVerify(keypair.publicKey, 'my-message', proof)
+console.log('Proof is valid:', isValid) // true
+
+// Get deterministic hash output
+const hash = vrf.vrfProofToHash(proof)
+console.log('VRF hash:', hash)
 ```
 
-## Support matrix
+### TypeScript Usage
+
+```typescript
+import { generateKeypairFromSeed, vrfProve, vrfVerify, vrfProofToHash, VrfKeyPair } from 'node-ark-vrf'
+
+const keypair: VrfKeyPair = generateKeypairFromSeed('my-secret-seed')
+const proof: string = vrfProve(keypair.secretKey, 'my-message', 'optional-aux-data')
+const isValid: boolean = vrfVerify(keypair.publicKey, 'my-message', proof, 'optional-aux-data')
+```
+
+## Examples
+
+Comprehensive examples are available in the [`examples/`](./examples) directory:
+
+- **Basic Usage**: Keypair generation, proving, and verification
+- **Advanced Features**: Auxiliary data, batch operations, error handling
+- **Real-World Applications**: Random beacons, leader election, lottery systems
+- **TypeScript**: Full TypeScript support with type definitions
+- **Integration**: Express.js API and React demos
+
+See [examples/README.md](./examples/README.md) for detailed guides and tutorials.
+
+## API Reference
+
+### `generateKeypairFromSeed(seed: string): VrfKeyPair`
+
+Generates a VRF keypair from a seed string.
+
+- `seed`: A string used to deterministically generate the keypair
+- Returns: `VrfKeyPair` containing hex-encoded `publicKey` and `secretKey`
+
+### `vrfProve(secretKey: string, message: string, auxData?: string): string`
+
+Generates a VRF proof for a message using the secret key.
+
+- `secretKey`: Hex-encoded secret key from `VrfKeyPair`
+- `message`: Message to generate proof for
+- `auxData`: Optional auxiliary data to include in the proof
+- Returns: Hex-encoded VRF proof
+
+### `vrfVerify(publicKey: string, message: string, proof: string, auxData?: string): boolean`
+
+Verifies a VRF proof using the public key.
+
+- `publicKey`: Hex-encoded public key from `VrfKeyPair`
+- `message`: Original message
+- `proof`: Hex-encoded proof from `vrfProve`
+- `auxData`: Optional auxiliary data (must match what was used in `vrfProve`)
+- Returns: `true` if the proof is valid, `false` otherwise
+
+### `vrfProofToHash(proof: string): string`
+
+Converts a VRF proof to its hash output.
+
+- `proof`: Hex-encoded proof from `vrfProve`
+- Returns: Hex-encoded hash value
+
+## Use Cases
+
+VRFs are ideal for applications requiring verifiable randomness:
+
+- **🎲 Consensus Protocols**: Leader election and committee selection in blockchain networks
+- **🔀 Random Beacons**: Unbiasable distributed randomness for lotteries and gaming
+- **🔒 Privacy-Preserving DNS**: NSEC5-like authenticated denial of existence
+- **⚖️ Fair Lotteries**: Transparent and verifiable random selection
+- **🔑 Key Derivation**: Deterministic key generation with cryptographic proofs
+- **📊 Random Sampling**: Verifiable audit and survey sampling
+
+## Cryptographic Suite
+
+This library uses the **Bandersnatch curve** with **SHA-512** hash function and **Elligator2** encoding, providing:
+
+- **128-bit security level**
+- **IETF VRF compliance** ([RFC 9381](https://datatracker.ietf.org/doc/rfc9381/))
+- **VRF with Additional Data (VRF-AD)** support
+- **Side-channel resistance** through arkworks implementation
+
+## Building from Source
+
+### Prerequisites
+
+- **Rust** (latest stable version)
+- **Node.js** 14+ with npm/yarn
+- **Python** 3.x (for node-gyp)
+- **C++ build tools** (platform-specific)
+
+### Build Steps
+
+```bash
+# Clone the repository
+git clone https://github.com/sentientforest/node-ark-vrf.git
+cd node-ark-vrf
+
+# Install dependencies
+yarn install
+
+# Build the native addon
+yarn build
+
+# Run tests
+yarn test
+```
+
+### Development Workflow
+
+```bash
+# Make changes to Rust code (src/lib.rs)
+yarn build
+
+# Test your changes
+yarn test
+
+# Try examples
+node examples/basic/01-keypair-generation.js
+```
+
+### Using Locally in Your Project
+
+#### Method 1: npm link (recommended)
+
+```bash
+# In the node-ark-vrf directory
+npm link
+
+# In your project directory
+npm link node-ark-vrf
+```
+
+#### Method 2: Local file reference
+
+```json
+{
+  "dependencies": {
+    "node-ark-vrf": "file:../path/to/node-ark-vrf"
+  }
+}
+```
+
+## Support Matrix
 
 ### Operating Systems
 
-|                  | node14 | node16 | node18 |
-| ---------------- | ------ | ------ | ------ |
-| Windows x64      | ✓      | ✓      | ✓      |
-| Windows x32      | ✓      | ✓      | ✓      |
-| Windows arm64    | ✓      | ✓      | ✓      |
-| macOS x64        | ✓      | ✓      | ✓      |
-| macOS arm64      | ✓      | ✓      | ✓      |
-| Linux x64 gnu    | ✓      | ✓      | ✓      |
-| Linux x64 musl   | ✓      | ✓      | ✓      |
-| Linux arm gnu    | ✓      | ✓      | ✓      |
-| Linux arm64 gnu  | ✓      | ✓      | ✓      |
-| Linux arm64 musl | ✓      | ✓      | ✓      |
-| Android arm64    | ✓      | ✓      | ✓      |
-| Android armv7    | ✓      | ✓      | ✓      |
-| FreeBSD x64      | ✓      | ✓      | ✓      |
+|                  | node14 | node16 | node18 | node20 |
+| ---------------- | ------ | ------ | ------ | ------ |
+| Windows x64      | ✓      | ✓      | ✓      | ✓      |
+| Windows x32      | ✓      | ✓      | ✓      | ✓      |
+| Windows arm64    | ✓      | ✓      | ✓      | ✓      |
+| macOS x64        | ✓      | ✓      | ✓      | ✓      |
+| macOS arm64      | ✓      | ✓      | ✓      | ✓      |
+| Linux x64 gnu    | ✓      | ✓      | ✓      | ✓      |
+| Linux x64 musl   | ✓      | ✓      | ✓      | ✓      |
+| Linux arm gnu    | ✓      | ✓      | ✓      | ✓      |
+| Linux arm64 gnu  | ✓      | ✓      | ✓      | ✓      |
+| Linux arm64 musl | ✓      | ✓      | ✓      | ✓      |
+| Android arm64    | ✓      | ✓      | ✓      | ✓      |
+| Android armv7    | ✓      | ✓      | ✓      | ✓      |
+| FreeBSD x64      | ✓      | ✓      | ✓      | ✓      |
 
-## Ability
+## Security Considerations
 
-### Build
+- **Key Management**: Never hardcode secret keys in production code. Use environment variables or secure key management systems.
+- **Side-Channel Protection**: The underlying ark-vrf implementation includes protections against timing attacks.
+- **Randomness Quality**: VRF outputs are cryptographically secure but deterministic. Use appropriate entropy sources for key generation.
+- **Auxiliary Data**: Always use auxiliary data when context binding is required for security.
 
-After `yarn build/npm run build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
+## Contributing
 
-### Test
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-With [ava](https://github.com/avajs/ava), run `yarn test/npm run test` to testing native addon. You can also switch to another testing framework if you want.
+### Development Setup
 
-### CI
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Ensure all tests pass: `yarn test`
+6. Submit a pull request
 
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@14`, `node@16`, `@node18`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
+## Troubleshooting
 
-### Release
+### Common Issues
 
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
-
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
-
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
-
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
-
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `yarn add @napi-rs/package-template` to see how it works.
-
-## Develop requirements
-
-- Install the latest `Rust`
-- Install `Node.js@10+` which fully supported `Node-API`
-- Install `yarn@1.x`
-
-## Test in local
-
-- yarn
-- yarn build
-- yarn test
-
-And you will see:
+**"Cannot find module 'node-ark-vrf'"**
 
 ```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
+# Make sure the library is built
+yarn build
 ```
 
-## Release package
+**"Invalid key format"**
 
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
+- Ensure keys are hex-encoded strings
+- Check that you're not passing raw bytes
 
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
+**"Verification failed"**
 
-When you want to release the package:
+- Verify you're using the correct public key
+- Ensure the message and auxiliary data match exactly
 
-```
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
+### Getting Help
 
-git push
-```
+- Check the [examples/](./examples) directory for usage patterns
+- Review the [API documentation](#api-reference)
+- Open an issue on [GitHub](https://github.com/sentientforest/node-ark-vrf/issues)
 
-GitHub actions will do the rest job for you.
+## Related Projects
+
+- [ark-vrf](https://github.com/davxy/ark-vrf) - The underlying Rust VRF implementation
+- [RFC 9381](https://datatracker.ietf.org/doc/rfc9381/) - IETF VRF specification
+- [arkworks](https://github.com/arkworks-rs) - Rust ecosystem for zero-knowledge cryptography
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
