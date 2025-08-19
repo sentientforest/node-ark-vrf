@@ -1,28 +1,28 @@
 [package]
-name = "node-ark-vrf"
-version = "0.1.0"
-edition = "2021"
 authors = ["Mike Graham <michael@forested.earth>"]
+edition = "2021"
+name    = "node-ark-vrf"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-ark-vrf = { version = "0.1.0", features = ["bandersnatch", "std"] }
-napi = { version = "2", features = ["napi8"] }
-napi-derive = "2"
-ark-ff = { version = "0.5", default-features = false }
-ark-ec = { version = "0.5", default-features = false }
+ark-ec        = { version = "0.5", default-features = false }
+ark-ff        = { version = "0.5", default-features = false }
 ark-serialize = { version = "0.5", default-features = false }
-ark-std = { version = "0.5", default-features = false }
-hex = "0.4"
-sha2 = { version = "0.10", default-features = false }
+ark-std       = { version = "0.5", default-features = false }
+ark-vrf       = { version = "0.1.0", features = ["bandersnatch", "std"] }
+hex           = "0.4"
+napi          = { version = "2", features = ["napi8"] }
+napi-derive   = "2"
+sha2          = { version = "0.10", default-features = false }
 
 [build-dependencies]
 napi-build = "2"
 
 [profile.release]
-lto = true
-opt-level = 3
 codegen-units = 1
-panic = "abort"
+lto           = true
+opt-level     = 3
+panic         = "abort"
