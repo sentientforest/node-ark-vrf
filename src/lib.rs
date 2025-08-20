@@ -1,7 +1,6 @@
 #![deny(clippy::all)]
 
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_vrf::reexports::ark_ec::CurveGroup;
 use ark_vrf::suites::bandersnatch::*;
 use ark_vrf::Output;
 use napi::bindgen_prelude::*;
@@ -13,6 +12,12 @@ use sha2::Sha512;
 pub struct VrfKeyPair {
   pub public_key: String,
   pub secret_key: String,
+}
+
+#[napi(object)]
+pub struct VrfProofOutput {
+  pub proof: String,
+  pub output: String,
 }
 
 #[napi]
@@ -34,7 +39,7 @@ pub fn generate_keypair_from_seed(seed: String) -> VrfKeyPair {
 }
 
 #[napi]
-pub fn vrf_prove(secret_key: String, message: String, aux_data: Option<String>) -> Result<String> {
+pub fn vrf_prove(secret_key: String, message: String, aux_data: Option<String>) -> Result<VrfProofOutput> {
   let secret_bytes = hex::decode(&secret_key)
     .map_err(|e| Error::from_reason(format!("Invalid secret key hex: {}", e)))?;
 
@@ -55,7 +60,15 @@ pub fn vrf_prove(secret_key: String, message: String, aux_data: Option<String>) 
     .serialize_compressed(&mut proof_bytes)
     .map_err(|e| Error::from_reason(format!("Failed to serialize proof: {}", e)))?;
 
-  Ok(hex::encode(proof_bytes))
+  let mut output_bytes = Vec::new();
+  output
+    .serialize_compressed(&mut output_bytes)
+    .map_err(|e| Error::from_reason(format!("Failed to serialize output: {}", e)))?;
+
+  Ok(VrfProofOutput {
+    proof: hex::encode(proof_bytes),
+    output: hex::encode(output_bytes),
+  })
 }
 
 #[napi]
@@ -63,6 +76,7 @@ pub fn vrf_verify(
   public_key: String,
   message: String,
   proof: String,
+  output: String,
   aux_data: Option<String>,
 ) -> Result<bool> {
   let public_bytes = hex::decode(&public_key)
@@ -83,10 +97,13 @@ pub fn vrf_verify(
 
   let aux_data = aux_data.as_deref().unwrap_or_default().as_bytes();
 
+  let output_bytes = hex::decode(&output)
+    .map_err(|e| Error::from_reason(format!("Invalid output hex: {}", e)))?;
+
+  let output = Output::deserialize_compressed(&*output_bytes)
+    .map_err(|e| Error::from_reason(format!("Invalid output bytes: {}", e)))?;
+
   use ark_vrf::ietf::Verifier;
-  let s_h = input.0 * proof.s;
-  let c_y = public.0 * proof.c;
-  let output = Output::from((s_h - c_y).into_affine());
   Ok(public.verify(input, output, aux_data, &proof).is_ok())
 }
 
