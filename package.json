@@ -33,7 +33,10 @@
         "aarch64-pc-windows-msvc",
         "armv7-linux-androideabi"
       ]
-    }
+    },
+    "watchIgnore": [
+      "ext/**"
+    ]
   },
   "engines": {
     "node": ">= 10"
@@ -51,7 +54,7 @@
     "format:prettier": "prettier . -w",
     "format:toml": "taplo format",
     "format:rs": "cargo fmt",
-    "lint": "oxlint .",
+    "lint": "oxlint . --ignore-path=ext",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "version": "napi version",
@@ -83,6 +86,14 @@
     ]
   },
   "ava": {
+    "files": [
+      "__test__/**/*",
+      "test/**/*",
+      "tests/**/*",
+      "**/*.test.*",
+      "**/*.spec.*",
+      "!ext/**"
+    ],
     "extensions": {
       "ts": "module"
     },
@@ -94,7 +105,12 @@
     "nodeArguments": [
       "--import",
       "@oxc-node/core/register"
-    ]
+    ],
+    "watchMode": {
+      "ignoreChanges": [
+        "ext/**"
+      ]
+    }
   },
   "prettier": {
     "printWidth": 120,
