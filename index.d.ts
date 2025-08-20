@@ -9,5 +9,10 @@ export interface VrfKeyPair {
 }
 export declare function generateKeypairFromSeed(seed: string): VrfKeyPair
 export declare function vrfProve(secretKey: string, message: string, auxData?: string | undefined | null): string
-export declare function vrfVerify(publicKey: string, message: string, proof: string, auxData?: string | undefined | null): boolean
+export declare function vrfVerify(
+  publicKey: string,
+  message: string,
+  proof: string,
+  auxData?: string | undefined | null,
+): boolean
 export declare function vrfProofToHash(proof: string): string
